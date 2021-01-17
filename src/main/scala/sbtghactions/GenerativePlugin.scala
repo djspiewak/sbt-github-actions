@@ -447,7 +447,12 @@ ${indent(jobs.map(compileJob(_, sbt)).mkString("\n\n"), 1)}"""
     githubWorkflowTargetTags := Seq(),
 
     githubWorkflowEnv := Map("GITHUB_TOKEN" -> s"$${{ secrets.GITHUB_TOKEN }}"),
-    githubWorkflowAddedJobs := Seq())
+    githubWorkflowAddedJobs := Seq(),
+
+    githubWorkflowAutoMerge := false,
+    githubWorkflowAutoMergeAuthor := "scala-steward",
+    githubWorkflowAutoMergeMethod := MergeMethod.Squash
+  )
 
   private lazy val internalTargetAggregation = settingKey[Seq[File]]("Aggregates target directories from all subprojects")
 
@@ -610,6 +615,25 @@ ${indent(jobs.map(compileJob(_, sbt)).mkString("\n\n"), 1)}"""
           javas = List(githubWorkflowJavaVersions.value.head),
           needs = List("build"))).filter(_ => !githubWorkflowPublishTargetBranches.value.isEmpty)
 
+      val autoMergeOpt = if (githubWorkflowAutoMerge.value)
+        WorkflowJob(
+          id = "merge",
+          name = "Merge automatically",
+          steps = WorkflowStep.Use(
+            owner = "ridedott",
+            repo = "merge-me-action",
+            ref = "v1",
+            params = Map(
+              "GITHUB_LOGIN" -> githubWorkflowAutoMergeAuthor.value,
+              "GITHUB_TOKEN" -> "${{ secrets.GITHUB_TOKEN }}",
+              "MERGE_METHOD" -> githubWorkflowAutoMergeMethod.value.value
+            )
+          ) :: Nil,
+          needs = List("build")
+        ) :: Nil
+      else
+        Nil
+
       Seq(
         WorkflowJob(
           "build",
@@ -629,7 +653,8 @@ ${indent(jobs.map(compileJob(_, sbt)).mkString("\n\n"), 1)}"""
           matrixAdds = githubWorkflowBuildMatrixAdditions.value,
           matrixIncs = githubWorkflowBuildMatrixInclusions.value.toList,
           matrixExcs = githubWorkflowBuildMatrixExclusions.value.toList,
-          runsOnExtraLabels = githubWorkflowBuildRunsOnExtraLabels.value.toList )) ++ publishJobOpt ++ githubWorkflowAddedJobs.value
+          runsOnExtraLabels = githubWorkflowBuildRunsOnExtraLabels.value.toList )
+      ) ++ autoMergeOpt ++ publishJobOpt ++ githubWorkflowAddedJobs.value
     })
 
   private val generateCiContents = Def task {

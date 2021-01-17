@@ -20,3 +20,4 @@ ThisBuild / githubWorkflowBuildMatrixExclusions +=
 
 ThisBuild / githubWorkflowBuild += WorkflowStep.Run(List("echo yo"))
 ThisBuild / githubWorkflowPublish += WorkflowStep.Run(List("echo sup"))
+ThisBuild / githubWorkflowAutoMerge := true

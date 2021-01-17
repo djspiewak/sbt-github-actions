@@ -73,6 +73,22 @@ jobs:
           name: target-${{ matrix.os }}-${{ matrix.scala }}-${{ matrix.java }}
           path: targets.tar
 
+  merge:
+    name: Merge automatically
+    needs: [build]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        scala: [2.13.1]
+        java: [adopt@1.8]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: ridedott/merge-me-action@v1
+        with:
+          GITHUB_LOGIN: scala-steward
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: SQUASH
+
   publish:
     name: Publish Artifacts
     needs: [build]
