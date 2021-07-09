@@ -16,23 +16,23 @@
 
 package sbtghactions
 
-sealed trait PREventType extends Product with Serializable
+sealed trait PREventType extends EventType
 
 object PREventType {
   val Defaults = List(Opened, Reopened, Synchronize)
 
-  case object Assigned extends PREventType
-  case object Unassigned extends PREventType
-  case object Labeled extends PREventType
-  case object Unlabeled extends PREventType
-  case object Opened extends PREventType
-  case object Edited extends PREventType
-  case object Closed extends PREventType
-  case object Reopened extends PREventType
-  case object Synchronize extends PREventType
-  case object ReadyForReview extends PREventType
-  case object Locked extends PREventType
-  case object Unlocked extends PREventType
-  case object ReviewRequested extends PREventType
+  case object Assigned             extends PREventType
+  case object Unassigned           extends PREventType
+  case object Labeled              extends PREventType
+  case object Unlabeled            extends PREventType
+  case object Opened               extends PREventType
+  case object Edited               extends PREventType
+  case object Closed               extends PREventType
+  case object Reopened             extends PREventType
+  case object Synchronize          extends PREventType
+  case object ReadyForReview       extends PREventType
+  case object Locked               extends PREventType
+  case object Unlocked             extends PREventType
+  case object ReviewRequested      extends PREventType
   case object ReviewRequestRemoved extends PREventType
 }

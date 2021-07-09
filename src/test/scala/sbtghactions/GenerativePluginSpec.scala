@@ -45,7 +45,17 @@ class GenerativePluginSpec extends Specification {
         |jobs:
         |  """.stripMargin
 
-      compileWorkflow("test", List("main"), Nil, PREventType.Defaults, Map(), Nil, "sbt") mustEqual expected
+      compileWorkflow(
+        Workflow(
+          "test",
+          List(
+            WebhookEvent.PullRequest(List("main"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main"), Nil, Nil)
+            ),
+          Nil,
+          Map(),
+          ),
+        "sbt") mustEqual expected
     }
 
     "produce the appropriate skeleton around a zero-job workflow with non-empty tags" in {
@@ -62,7 +72,17 @@ class GenerativePluginSpec extends Specification {
         |jobs:
         |  """.stripMargin
 
-      compileWorkflow("test", List("main"), List("howdy"), PREventType.Defaults, Map(), Nil, "sbt") mustEqual expected
+      compileWorkflow(
+        Workflow(
+          "test",
+          List(
+            WebhookEvent.PullRequest(List("main"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main"), List("howdy"), Nil)
+            ),
+          Nil,
+          Map(),
+          ),
+        "sbt") mustEqual expected
     }
 
     "respect non-default pr types" in {
@@ -79,7 +99,20 @@ class GenerativePluginSpec extends Specification {
         |jobs:
         |  """.stripMargin
 
-      compileWorkflow("test", List("main"), Nil, List(PREventType.ReadyForReview, PREventType.ReviewRequested, PREventType.Opened), Map(), Nil, "sbt") mustEqual expected
+      compileWorkflow(
+        Workflow(
+          "test",
+          List(
+            WebhookEvent.PullRequest(
+              List("main"),
+              Nil,
+              Nil,
+              List(PREventType.ReadyForReview, PREventType.ReviewRequested, PREventType.Opened)),
+            WebhookEvent.Push(List("main"), Nil, Nil)),
+          Nil,
+          Map(),
+          ),
+        "sbt") mustEqual expected
     }
 
     "compile a one-job workflow targeting multiple branch patterns with a environment variables" in {
@@ -108,17 +141,20 @@ class GenerativePluginSpec extends Specification {
         |      - run: echo Hello World""".stripMargin
 
       compileWorkflow(
-        "test2",
-        List("main", "backport/v*"),
-        Nil,
-        PREventType.Defaults,
-        Map(
-          "GITHUB_TOKEN" -> s"$${{ secrets.GITHUB_TOKEN }}"),
-        List(
-          WorkflowJob(
-            "build",
-            "Build and Test",
-            List(WorkflowStep.Run(List("echo Hello World"))))),
+        Workflow(
+          "test2",
+          List(
+            WebhookEvent.PullRequest(List("main", "backport/v*"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main", "backport/v*"), Nil, Nil)
+            ),
+          List(
+            WorkflowJob(
+              "build",
+              "Build and Test",
+              List(WorkflowStep.Run(List("echo Hello World"))))),
+          Map(
+            "GITHUB_TOKEN" -> s"$${{ secrets.GITHUB_TOKEN }}"),
+          ),
         "sbt") mustEqual expected
     }
 
@@ -155,22 +191,26 @@ class GenerativePluginSpec extends Specification {
         |    steps:
         |      - run: whoami""".stripMargin
 
-      compileWorkflow(
-        "test3",
-        List("main"),
-        Nil,
-        PREventType.Defaults,
-        Map(),
-        List(
-          WorkflowJob(
-            "build",
-            "Build and Test",
-            List(WorkflowStep.Run(List("echo yikes")))),
 
-          WorkflowJob(
-            "what",
-            "If we just didn't",
-            List(WorkflowStep.Run(List("whoami"))))),
+      compileWorkflow(
+        Workflow(
+          "test3",
+          List(
+            WebhookEvent.PullRequest(List("main"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main"), Nil, Nil)
+            ),
+          List(
+            WorkflowJob(
+              "build",
+              "Build and Test",
+              List(WorkflowStep.Run(List("echo yikes")))),
+
+            WorkflowJob(
+              "what",
+              "If we just didn't",
+              List(WorkflowStep.Run(List("whoami"))))),
+          Map(),
+          ),
         "") mustEqual expected
     }
 
@@ -198,18 +238,21 @@ class GenerativePluginSpec extends Specification {
         |      - run: echo yikes""".stripMargin
 
       compileWorkflow(
-        "test4",
-        List("main"),
-        Nil,
-        PREventType.Defaults,
-        Map(),
-        List(
-          WorkflowJob(
-            "build",
-            "Build and Test",
-            List(WorkflowStep.Run(List("echo yikes"))),
-            container = Some(
-              JobContainer("not:real-thing")))),
+        Workflow(
+          "test4",
+          List(
+            WebhookEvent.PullRequest(List("main"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main"), Nil, Nil)
+            ),
+          List(
+            WorkflowJob(
+              "build",
+              "Build and Test",
+              List(WorkflowStep.Run(List("echo yikes"))),
+              container = Some(
+                JobContainer("not:real-thing")))),
+          Map(),
+          ),
         "") mustEqual expected
     }
 
@@ -247,24 +290,27 @@ class GenerativePluginSpec extends Specification {
         |      - run: echo yikes""".stripMargin
 
       compileWorkflow(
-        "test4",
-        List("main"),
-        Nil,
-        PREventType.Defaults,
-        Map(),
-        List(
-          WorkflowJob(
-            "build",
-            "Build and Test",
-            List(WorkflowStep.Run(List("echo yikes"))),
-            container = Some(
-              JobContainer(
-                "also:not-real",
-                credentials = Some("janedoe" -> "myvoice"),
-                env = Map("VERSION" -> "1.0", "PATH" -> "/nope"),
-                volumes = Map("/source" -> "/dest/ination"),
-                ports = List(80, 443),
-                options = List("--cpus", "1"))))),
+        Workflow(
+          "test4",
+          List(
+            WebhookEvent.PullRequest(List("main"), Nil, Nil, PREventType.Defaults),
+            WebhookEvent.Push(List("main"), Nil, Nil)
+            ),
+          List(
+            WorkflowJob(
+              "build",
+              "Build and Test",
+              List(WorkflowStep.Run(List("echo yikes"))),
+              container = Some(
+                JobContainer(
+                  "also:not-real",
+                  credentials = Some("janedoe" -> "myvoice"),
+                  env = Map("VERSION" -> "1.0", "PATH" -> "/nope"),
+                  volumes = Map("/source" -> "/dest/ination"),
+                  ports = List(80, 443),
+                  options = List("--cpus", "1"))))),
+          Map(),
+          ),
         "") mustEqual expected
     }
   }
@@ -585,6 +631,26 @@ class GenerativePluginSpec extends Specification {
     - run: echo hello"""
     }
 
+    "compile a job with extra runs-on labels, but without oses" in {
+      compileJob(
+        WorkflowJob(
+          "job",
+          "my-name",
+          List(
+            WorkflowStep.Run(List("echo hello"))),
+          runsOnExtraLabels = List("runner-label", "runner-group"),
+          oses = Nil
+        ), "") mustEqual """job:
+  name: my-name
+  strategy:
+    matrix:
+      scala: [2.13.4]
+      java: [adopt@1.8]
+  runs-on: [ runner-label, runner-group ]
+  steps:
+    - run: echo hello"""
+    }
+
     "produce an error when compiling a job with `include` key in matrix" in {
       compileJob(
         WorkflowJob(
@@ -779,8 +845,8 @@ class GenerativePluginSpec extends Specification {
   }
 
   "predicate compilation" >> {
-    import RefPredicate._
     import Ref._
+    import RefPredicate._
 
     "equals" >> {
       compileBranchPredicate("thingy", Equals(Branch("other"))) mustEqual "thingy == 'refs/heads/other'"

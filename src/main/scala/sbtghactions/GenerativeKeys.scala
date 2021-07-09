@@ -23,10 +23,13 @@ trait GenerativeKeys {
   lazy val githubWorkflowGenerate = taskKey[Unit]("Generates (and overwrites if extant) a ci.yml and clean.yml actions description according to configuration")
   lazy val githubWorkflowCheck = taskKey[Unit]("Checks to see if the ci.yml and clean.yml files are equivalent to what would be generated and errors if otherwise")
 
+  lazy val githubWorkflowGenerationTargets = settingKey[Set[GenerationTarget]]("Configure targets to be generated. (CI, Clean or Custom)")
   lazy val githubWorkflowGeneratedCI = settingKey[Seq[WorkflowJob]]("The sequence of jobs which will make up the generated ci workflow (ci.yml)")
   lazy val githubWorkflowGeneratedUploadSteps = settingKey[Seq[WorkflowStep]]("The sequence of steps used to upload intermediate build artifacts for an adjacent job")
   lazy val githubWorkflowGeneratedDownloadSteps = settingKey[Seq[WorkflowStep]]("The sequence of steps used to download intermediate build artifacts published by an adjacent job")
   lazy val githubWorkflowGeneratedCacheSteps = settingKey[Seq[WorkflowStep]]("The sequence of steps used to configure caching for ivy, sbt, and coursier")
+
+  lazy val githubWorkflowCustomWorkflows = settingKey[Map[String, Workflow]]("Custom workflows, defined by a map of file name to Workflow.")
 
   lazy val githubWorkflowSbtCommand = settingKey[String]("The command which invokes sbt (default: sbt)")
   lazy val githubWorkflowUseSbtThinClient = settingKey[Boolean]("Whether to use sbt's native thin client (default for sbt >= 1.4: true, default for sbt < 1.4: false)")
@@ -43,7 +46,7 @@ trait GenerativeKeys {
 
   lazy val githubWorkflowPublishPreamble = settingKey[Seq[WorkflowStep]]("A list of steps to insert after base setup but before publishing (default: [])")
   lazy val githubWorkflowPublishPostamble = settingKey[Seq[WorkflowStep]]("A list of steps to insert after publication but before the end of the publish job (default: [])")
-  lazy val githubWorkflowPublish = settingKey[Seq[WorkflowStep]]("A sequence workflow steps which publishe the project (default: [Sbt(List(\"+publish\"))])")
+  lazy val githubWorkflowPublish = settingKey[Seq[WorkflowStep]]("A sequence workflow steps which publishes the project (default: [Sbt(List(\"+publish\"))])")
   lazy val githubWorkflowPublishTargetBranches = settingKey[Seq[RefPredicate]]("A set of branch predicates which will be applied to determine whether the current branch gets a publication stage; if empty, publish will be skipped entirely (default: [== main])")
   lazy val githubWorkflowPublishCond = settingKey[Option[String]]("A set of conditionals to apply to the publish job to further restrict its run (default: [])")
 
