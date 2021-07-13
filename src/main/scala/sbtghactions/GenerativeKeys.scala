@@ -29,7 +29,7 @@ trait GenerativeKeys {
   lazy val githubWorkflowGeneratedCacheSteps = settingKey[Seq[WorkflowStep]]("The sequence of steps used to configure caching for ivy, sbt, and coursier")
 
   lazy val githubWorkflowSbtCommand = settingKey[String]("The command which invokes sbt (default: sbt)")
-  lazy val githubWorkflowUseSbtThinClient = settingKey[Boolean]("Whether to use sbt's native thin client (default for sbt >= 1.4: true, default for sbt < 1.4: false)")
+  lazy val githubWorkflowUseSbtThinClient = settingKey[Boolean]("Whether to use sbt's native thin client, default is false since this can cause issues (see https://github.com/sbt/sbt/issues/6468)")
 
   lazy val githubWorkflowBuildMatrixFailFast = settingKey[Option[Boolean]]("Whether or not to enable the fail-fast strategy (default: None/Enabled)")
   lazy val githubWorkflowBuildMatrixAdditions = settingKey[Map[String, List[String]]]("A map of additional matrix dimensions for the build job. Each list should be non-empty. (default: {})")

@@ -8,3 +8,5 @@ ThisBuild / githubWorkflowBuild ++= List(
   WorkflowStep.Sbt(List("using")),
   WorkflowStep.Sbt(List("sbtn"))
 )
+
+ThisBuild / githubWorkflowUseSbtThinClient := true
