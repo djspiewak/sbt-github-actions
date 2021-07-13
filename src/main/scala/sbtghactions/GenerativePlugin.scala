@@ -517,7 +517,7 @@ ${indent(jobs.map(compileJob(_, sbt)).mkString("\n\n"), 1)}"""
         }
 
         val tar = WorkflowStep.Run(
-          List(s"tar cf targets.tar ${sanitized.mkString(" ")} project/target"),
+          List(s"tar --ignore-failed-read -cf targets.tar ${sanitized.mkString(" ")} project/target"),
           name = Some("Compress target directories"))
 
         val upload = WorkflowStep.Use(
